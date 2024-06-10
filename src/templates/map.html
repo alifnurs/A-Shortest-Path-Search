@@ -1,0 +1,95 @@
+<html>
+  <head>
+    <title>Path Visualization</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+    <link rel="stylesheet" type="text/css" href="https://js.api.here.com/v3/3.1/mapsjs-ui.css" />
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.1/mapsjs-core.js"></script>
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.1/mapsjs-service.js"></script>
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.1/mapsjs-ui.js"></script>
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.1/mapsjs-mapevents.js"></script>
+  </head>
+
+  <body style="margin: 0">
+    <div style="width: 100%; height: 100%" id="mapContainer"></div>
+    <script type="text/javascript">
+      var points = JSON.parse('{{points|tojson}}')
+      var path = JSON.parse('{{path|tojson}}')
+    </script>
+    <script type="text/javascript">
+      function addMarkerToGroup(group, coordinate, locationInfo) {
+        var marker = new H.map.Marker(coordinate)
+        marker.setData(locationInfo)
+        group.addObject(marker)
+      }
+      
+      function addClickableBubble(map, points) {
+        var group = new H.map.Group()
+      
+        map.addObject(group)
+      
+        group.addEventListener(
+          'tap',
+          function (evt) {
+            var bubble = new H.ui.InfoBubble(evt.target.getGeometry(), {
+              content: evt.target.getData()
+            })
+            ui.addBubble(bubble)
+          },
+          false
+        )
+
+        points.forEach((node) => {
+          addMarkerToGroup(group, { lat: node[0], lng: node[1] }, node[2])
+        })
+      }
+      
+      function addPolylineToMap(map, path) {
+        var lineString = new H.geo.LineString()
+      
+        path.forEach((node) => {
+          lineString.pushPoint({ lat: node[0], lng: node[1] })
+        })
+      
+        map.addObject(new H.map.Polyline(lineString, { style: { lineWidth: 3 } }))
+      }
+      
+      function addMarkerToPoints(map, points) {
+        points.forEach((node) => {
+          var marker = new H.map.Marker({ lat: node[0], lng: node[1] })
+      
+          map.addObject(marker)
+        })
+      }
+      
+      function addInfoBubble(map, points) {
+        points.forEach((node) => {
+          var bubble = new H.ui.InfoBubble(
+            { lat: node[0], lng: node[1] },
+            {
+              content: node[2]
+            }
+          )
+          ui.addBubble(bubble)
+        })
+      }
+      
+      var platform = new H.service.Platform({
+        apikey: 'd6fwa1OkDw8XiSGSdRf2DRdXViHN13RfRnibY-vxxp0'
+      })
+      
+      var defaultLayers = platform.createDefaultLayers()
+      
+      var map = new H.Map(document.getElementById('mapContainer'), defaultLayers.vector.normal.map, { center: { lat: points[0][0], lng: points[0][1] }, zoom: 16, pixelRatio: window.devicePixelRatio || 1 })
+      
+      window.addEventListener('resize', () => map.getViewPort().resize())
+      
+      var behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map))
+      
+      var ui = H.ui.UI.createDefault(map, defaultLayers)
+      
+      addClickableBubble(map, points)
+      addPolylineToMap(map, path)
+    </script>
+  </body>
+</html>
