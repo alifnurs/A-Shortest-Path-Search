@@ -130,19 +130,23 @@ while(True):
         else:
             solution = AStarSearch(graph, goalName, startName) 
 
-            if (len(solution) == 0): 
-                print ("Tidak ada rute yang ditemukan !!!")
-            else:
+        if (len(solution) == 0): 
+            print ("Tidak ada rute yang ditemukan !!!")
+        else:
+            print("Rute telah ditemukan !!!")
+            total_distance = 0
+            print("Jarak terdekat dari ", startName, "ke ", goalName, " adalah :")
+            for i in range(len(solution)-1):
+                node1 = solution[i]
+                node2 = solution[i+1]
+                distance = node1.neighbors[node2]
+                total_distance += distance
+                print(node1.name, end = " => ")
+            print(solution[-1].name)
+            print(f"Total jarak: {total_distance:.2f} km")
+            print()
             
-                print("Rute telah ditemukan !!!")
-                print("Jarak terdekat dari ", startName, "ke ", goalName, " adalah :")
-                for nodes in solution[:-1]:
-                    print(nodes.name, end = " => ")
-                print(solution[-1].name)
-                print()
-                
-                visualize(graph, solution)
-                
+            visualize(graph, solution)
  
     elif(choice == 2):
         graph = getGraphFromFile()
